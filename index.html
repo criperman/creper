@@ -1,1 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dino O'yini</title>
+    <style>
+        body { background: #f7f7f7; margin: 0; }
+        .game {
+            position: relative;
+            width: 600px;
+            height: 200px;
+            margin: 50px auto;
+            background: brown;
+            border: 2px solid #333;
+            overflow: hidden;
+        }
+        .dino {
+            position: absolute;
+            bottom: 0;
+            left: 50px;
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            transition: bottom 0.1s;
+        }
+        .dino img {
+            width: 100%;
+            height: 100%;
+            border-radius: 8px;
+        }
+        .obstacle {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 20px;
+            height: 40px;
+            background: #070000;
+            border-radius: 8px;
+        }
+        .obstacle img {
+            width: 100%;
+            height: 100%;
+            border-radius: 8px;
+        }
+        #score {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-size: 20px;
+            color: #fff;
+            z-index: 5;
+        }
+        #gameover-modal {
+            display: none;
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7);
+            color: #fff;
+            font-size: 32px;
+            justify-content: center;
+            align-items: center;
+            z-index: 20;
+        }
+    </style>
+</head>
+<body>
+    <div class="game" style="position:relative;">
+        <div class="dino" id="dino">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fb/Minecraft-creeper-face.jpg/500px-Minecraft-creeper-face.jpg" alt="">
+        </div>
+        <div class="obstacle" id="obstacle">
+            <img src="https://img.itch.zone/aW1hZ2UvMjIwNTYxOC8xMzA0MTUxNi5wbmc=/original/qingCE.png" alt="">
+        </div>
+        <div id="score">Ball: 0</div>
+        <button id="jump-btn" style="position:absolute;bottom:10px;right:10px;z-index:10;font-size:22px;padding:12px 28px;border-radius:12px;border:none;background:#fff;color:#333;font-weight:bold;">Sakra!</button>
+        <div id="gameover-modal" style="display:none;position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);color:#fff;font-size:32px;justify-content:center;align-items:center;z-index:20;">
+            <div style="width:100%;height:100%;display:flex;justify-content:center;align-items:center;">
+                <span>Sen yutqazding! Ball: <span id="final-score"></span></span>
+            </div>
+        </div>
+        <div id="start-modal" style="display:flex;position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);color:#fff;font-size:32px;justify-content:center;align-items:center;z-index:30;">
+            <div style="width:100%;height:100%;display:flex;flex-direction:column;justify-content:center;align-items:center;">
+                <span>O'yinni boshlashni xohlaysizmi?</span>
+                <button id="start-btn" style="margin-top:20px;font-size:24px;padding:10px 30px;">Boshlash</button>
+            </div>
+        </div>
+    </div>
+    <script>
+        const dino = document.getElementById('dino');
+        const dinoImg = dino.querySelector('img');
+        const obstacle = document.getElementById('obstacle');
+        const scoreElem = document.getElementById('score');
+        const modal = document.getElementById('gameover-modal');
+        const finalScore = document.getElementById('final-score');
+        const startModal = document.getElementById('start-modal');
+        const startBtn = document.getElementById('start-btn');
+        const jumpBtn = document.getElementById('jump-btn');
+        const gameDiv = document.querySelector('.game');
+        let gameStarted = false;
+        let isJumping = false;
+        let score = 0;
 
+        startBtn.addEventListener('click', function() {
+            startModal.style.display = 'none';
+            gameStarted = true;
+        });
+
+        function jump() {
+            if (!gameStarted || modal.style.display !== 'none' || isJumping) return;
+            isJumping = true;
+            let jumpHeight = 0;
+            const jumpInterval = setInterval(() => {
+                if (jumpHeight < 60) {
+                    jumpHeight += 1;
+                    dino.style.bottom = jumpHeight + 'px';
+                } else {
+                    clearInterval(jumpInterval);
+                    const fallInterval = setInterval(() => {
+                        if (jumpHeight > 0) {
+                            jumpHeight -= 0.9;
+                            dino.style.bottom = jumpHeight + 'px';
+                        } else {
+                            clearInterval(fallInterval);
+                            isJumping = false;
+                        }
+                    }, 10);
+                }
+            }, 10);
+        }
+
+        jumpBtn.addEventListener('click', jump);
+        gameDiv.addEventListener('click', jump);
+        gameDiv.addEventListener('touchstart', jump);
+
+        document.addEventListener('keydown', function(e) {
+            if (!gameStarted || modal.style.display !== 'none') return;
+            if (e.code === 'Space' && !isJumping) {
+                jump();
+            }
+            if (e.code === 'KeyX') {
+                dinoImg.src = "https://mc-heads.net/avatar/MHF_Steve";
+            }
+            if (e.code === 'KeyC') {
+                dinoImg.src = "https://i.pinimg.com/236x/dc/da/6b/dcda6bb4bac8a551c7deea5a45a23bbd.jpg";
+            }
+            if (e.code === 'KeyZ') {
+                dinoImg.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fb/Minecraft-creeper-face.jpg/500px-Minecraft-creeper-face.jpg";
+            }
+            if (e.code === 'KeyV') {
+                dinoImg.src = "https://d31sxl6qgne2yj.cloudfront.net/wordpress/wp-content/uploads/20190121140743/Minecraft-Wither-Skeleton-Head.jpg";
+            }
+            if (e.code === 'KeyB') {
+                dinoImg.src = "https://minecraftfaces.com/wp-content/bigfaces/big-enderdragon-face.png";
+            }
+        });
+
+        function moveObstacle() {
+            let obstacleLeft = 600;
+            setInterval(() => {
+                if (!gameStarted || modal.style.display !== 'none') return;
+                obstacleLeft -= 7;
+                obstacle.style.right = (600 - obstacleLeft) + 'px';
+
+                // Collision detection
+                const dinoBottom = parseInt(dino.style.bottom) || 0;
+                if (obstacleLeft < 90 && obstacleLeft > 50 && dinoBottom < 40) {
+                    finalScore.textContent = score;
+                    modal.style.display = 'flex';
+                    score = 0;
+                    scoreElem.textContent = 'Ball: ' + score;
+                    obstacleLeft = 600;
+                }
+
+                if (obstacleLeft <= 0) {
+                    obstacleLeft = 600;
+                    score++;
+                    scoreElem.textContent = 'Ball: ' + score;
+
+                    // Har 5 ballda dino rasmi o'zgaradi
+                    if (score % 25 === 5) {
+                        dinoImg.src = "https://mc-heads.net/avatar/MHF_Steve"; // KeyX rasm
+                    } else if (score % 25 === 10) {
+                        dinoImg.src = "https://i.pinimg.com/236x/dc/da/6b/dcda6bb4bac8a551c7deea5a45a23bbd.jpg"; // KeyC rasm
+                    } else if (score % 25 === 15) {
+                        dinoImg.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fb/Minecraft-creeper-face.jpg/500px-Minecraft-creeper-face.jpg"; // KeyZ rasm
+                    } else if (score % 25 === 20) {
+                        dinoImg.src = "https://d31sxl6qgne2yj.cloudfront.net/wordpress/wp-content/uploads/20190121140743/Minecraft-Wither-Skeleton-Head.jpg"; // KeyV rasm
+                    } else if (score % 25 === 0 && score !== 0) {
+                        dinoImg.src = "https://minecraftfaces.com/wp-content/bigfaces/big-enderdragon-face.png"; // KeyB rasm
+                    }
+                }
+            }, 30);
+        }
+
+        moveObstacle();
+
+        // Modalni yopish uchun istalgan joyni bosish
+        modal.addEventListener('click', function() {
+            modal.style.display = 'none';
+        });
+    </script>
+</body>
+</html>
